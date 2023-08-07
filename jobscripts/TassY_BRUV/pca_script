@@ -1,0 +1,21 @@
+#!/bin/bash -l
+#SBATCH --account=OD-220461
+#SBATCH --job-name=differencing
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=1000gb
+#SBATCH --time=0:59:00
+
+##SBATCH --mail-type=ALL
+##SBATCH --mail-user=b.maslen@unsw.edu.au
+
+cd /datasets/work/d61-icv-rpsa/work/Ben_M/Movement_OD_WD/code/augmentation/
+
+module load python/3.11
+
+source diff_cond_11_venv/bin/activate
+
+python -m pca_script -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassy_BRUV/training_data/' -c \
+ -di '../../data/Tassy_BRUV/augmented_images/' -n 600

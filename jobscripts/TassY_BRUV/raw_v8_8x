@@ -1,0 +1,24 @@
+#!/bin/bash -l
+#SBATCH --account=OD-220461
+#SBATCH --job-name=yolov5ms
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=256gb
+#SBATCH --time=23:59:59
+
+#SBATCH --gres=gpu:4
+##SBATCH --mail-type=ALL
+##SBATCH --mail-user=b.maslen@unsw.edu.au
+
+cd /datasets/work/d61-icv-rpsa/work/Ben_M/Movement_OD_WD/code/yolov8
+
+module load python/3.9.4
+
+source yolov8_venv/bin/activate
+
+yolov8_venv/bin/yolo detect train data=../../data/Tassy_BRUV/training_data/data.yaml \
+model=models/yolov8x.pt epochs=300 imgsz=1080 device=0,1,2,3 workers=8 \
+name=../../../../results/Tassy_BRUV/tassy_bruv_8x_raw_300_img_sz_1080
+
+python metrics.py -m '../../results/Tassy_BRUV/tassy_bruv_8x_raw_300_img_sz_1080/weights/best.pt'

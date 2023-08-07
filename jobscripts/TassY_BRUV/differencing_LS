@@ -1,0 +1,22 @@
+#!/bin/bash -l
+#SBATCH --account=OD-220461
+#SBATCH --job-name=differencing_TB
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=200gb
+#SBATCH --time=8:00:00
+
+##SBATCH --mail-type=ALL
+##SBATCH --mail-user=b.maslen@unsw.edu.au
+
+cd /datasets/work/d61-icv-rpsa/work/Ben_M/Movement_OD_WD/code/augmentation/
+
+module load python/3.9.4
+
+source augm_venv/bin/activate
+
+python -m differencing_long_short -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassy_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
+ -di '../../data/Tassy_BRUV/augmented_images/' -n 'diffBS_alpha_15_diff_4_bn_20_bs_120' \
+-d 4 -bn 20 -bs 120 -m 'diff_BS' -a 15

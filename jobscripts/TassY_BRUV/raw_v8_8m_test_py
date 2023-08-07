@@ -1,0 +1,22 @@
+#!/bin/bash -l
+#SBATCH --account=OD-220461
+#SBATCH --job-name=yolov5s
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=256gb
+#SBATCH --time=00:10:00
+
+#SBATCH --gres=gpu:4
+##SBATCH --mail-type=ALL
+##SBATCH --mail-user=b.maslen@unsw.edu.au
+
+cd /datasets/work/d61-icv-rpsa/work/Ben_M/Movement_OD_WD/code/yolov8
+
+module load python/3.9.4
+
+source yolov8_venv/bin/activate
+
+python yolo_run_test.py
+
+
