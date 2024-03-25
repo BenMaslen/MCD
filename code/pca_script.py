@@ -17,7 +17,7 @@ import random as random
 import argparse
 
 parser = argparse.ArgumentParser(
-    description="This script estimates principal components to dimension reduce an image with 3 colour layers to 2, \
+    description="This script undergoes PCA, estimating principal components to dimension reduce an image with 3 colour layers to 2, \
     saving the results as a pca.pkl file in the specified differenced directory."
 )
 
