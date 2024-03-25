@@ -1,18 +1,14 @@
 # importlibraries
 
 # libraries to extract frames
-import os
 import pandas as pd
 import cv2
 import numpy as np
-import shutil
 
 # libraries to undergo image augmentation
 import torch
 from torchvision import transforms
 from PIL import Image
-import numpy as np
-from torchvision.utils import save_image
 from sklearn.decomposition import PCA
 import pickle as pk
 import random as random
@@ -104,14 +100,14 @@ im_num_list_train = [
 im_num_list = random.sample(im_num_list_train, n)
 # im_num_list = list(range(0,10))
 
-if iterate == True:
+if iterate is True:
     expl_var = []
 
 pca = PCA(n_components=2, whiten=True)
 
 for im_num in im_num_list:
     # read in center image
-    if center_image_surround == True:
+    if center_image_surround is True:
         # read in video
         video = val_frame_dat["vid_location"][im_num]
         vidcap = cv2.VideoCapture(video)
@@ -130,7 +126,7 @@ for im_num in im_num_list:
     img_center_tens = convert_tensor(img_center)
 
     # fix video image before differencing
-    if center_image_surround == True:
+    if center_image_surround is True:
         img_center_tens = torch.stack(
             (
                 img_center_tens[2, :, :],
@@ -150,7 +146,7 @@ for im_num in im_num_list:
         convert_image(img_center_tens), (im_height * im_width, im_depth)
     )
 
-    if iterate == True:
+    if iterate is True:
         pca.fit(im_matrix)
         expl_var.append(
             [pca.explained_variance_ratio_[0], pca.explained_variance_ratio_[1]]
@@ -162,7 +158,7 @@ for im_num in im_num_list:
         else:
             im_matrix_all = np.concatenate((im_matrix_all, im_matrix))
 
-if iterate == False:
+if iterate is False:
     pca.fit(im_matrix_all)
     pd.DataFrame(pca.explained_variance_ratio_).to_csv(
         diff_folder + "explained_var.csv"

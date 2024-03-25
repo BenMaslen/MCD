@@ -3,7 +3,6 @@
 # libraries to extract surrounding images
 import os
 import pandas as pd
-import cv2
 import numpy as np
 import shutil
 
@@ -11,9 +10,7 @@ import shutil
 import torch
 from torchvision import transforms
 from PIL import Image
-import numpy as np
 from torchvision.utils import save_image
-from sklearn.decomposition import PCA
 import pickle as pk
 import random as random
 
@@ -182,7 +179,7 @@ for im_num in im_num_list:
     try:
         left_image_name = img_folder[im_index - diff]
         left_image = Image.open(val_frame_dat["image_folder"][im_num] + left_image_name)
-    except:
+    except:  # noqa: E722
         left_image_name = img_folder[im_index + diff]
         left_image = Image.open(val_frame_dat["image_folder"][im_num] + left_image_name)
 
@@ -191,7 +188,7 @@ for im_num in im_num_list:
         right_image = Image.open(
             val_frame_dat["image_folder"][im_num] + right_image_name
         )
-    except:
+    except:  # noqa: E722
         right_image_name = img_folder[im_index - diff]
         right_image = Image.open(
             val_frame_dat["image_folder"][im_num] + right_image_name
@@ -231,13 +228,13 @@ for im_num in im_num_list:
         # fix the image before differencing
         frame_BS_tens_avg_fixed = frame_BS_tens_total / BS_count
 
-        if image_size != False:
+        if image_size is not False:
             frame_BS_tens_avg_fixed = convert_tensor(
                 convert_image(frame_BS_tens_avg_fixed).resize(image_size)
             )
 
     # read in center image
-    if center_image_surround == True:
+    if center_image_surround is True:
         img_center = Image.open(val_frame_dat["image_location"][im_num])
     else:
         img_center = Image.open(
@@ -253,7 +250,7 @@ for im_num in im_num_list:
     img_center_tens = convert_tensor(img_center)
 
     # fix the left & right image before differencing
-    if image_size != False:
+    if image_size is not False:
         img_center_tens = convert_tensor(
             convert_image(img_center_tens).resize(image_size)
         )
@@ -335,9 +332,9 @@ for im_num in im_num_list:
         )
         break
 
-    if red_layer == True:
+    if red_layer is True:
         diff_im_avg = (diff_im[0, :, :] + diff_im[1, :, :] + diff_im[2, :, :]) / 3
-        if do_pca == True:
+        if do_pca is True:
             if im_num == 0:
                 pca = pk.load(open(diff_folder + "pca.pkl", "rb"))
 
@@ -374,7 +371,7 @@ for im_num in im_num_list:
     else:
         diff_im_final = diff_im
 
-    if time_stamp_loc != False:
+    if time_stamp_loc is not False:
         diff_im_final[
             :,
             time_stamp_loc[0] : time_stamp_loc[1],

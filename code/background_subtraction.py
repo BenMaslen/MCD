@@ -11,9 +11,6 @@ import shutil
 import torch
 from torchvision import transforms
 from PIL import Image
-import numpy as np
-from torchvision.utils import save_image
-from sklearn.decomposition import PCA
 import pickle as pk
 
 # argument library
@@ -208,10 +205,10 @@ for im_num in im_num_list:
 
         fgmask = fgbg.apply(frame)
 
-        if open_morph == True or close_morph == True:
-            if open_morph == True:
+        if open_morph is True or close_morph is True:
+            if open_morph is True:
                 fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
-            if close_morph == True:
+            if close_morph is True:
                 fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_CLOSE, kernel)
 
         frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES)
@@ -219,11 +216,11 @@ for im_num in im_num_list:
             im = Image.fromarray(fgmask)
             frame = convert_image(frame)
 
-            if image_size != False:
+            if image_size is not False:
                 im = im.resize(image_size)
                 frame = frame.resize(image_size)
 
-            if red_layer == True:
+            if red_layer is True:
                 img_center_tens = convert_tensor(frame)
                 img_center_tens = torch.stack(
                     (
@@ -235,7 +232,7 @@ for im_num in im_num_list:
                 )
                 im_torch = convert_tensor(im)
 
-                if do_pca == True:
+                if do_pca is True:
                     if im_num == 0:
                         pca = pk.load(open(diff_folder + "pca.pkl", "rb"))
 
@@ -286,7 +283,7 @@ for im_num in im_num_list:
                         )
                     )
 
-            if time_stamp_loc != False:
+            if time_stamp_loc is not False:
                 im_tens = convert_tensor(im)
                 im_tens[
                     :,
