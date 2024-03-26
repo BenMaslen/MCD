@@ -95,10 +95,8 @@ im_num_list_full = list(range(0, val_frame_dat.shape[0]))
 im_num_list_train = [
     im_num for im_num in im_num_list_full if val_frame_dat["split"][im_num] == "train"
 ]
-# im_num_list = [im_num for im_num in im_num_list_full if val_frame_dat['split'][im_num] == "train"]
 
 im_num_list = random.sample(im_num_list_train, n)
-# im_num_list = list(range(0,10))
 
 if iterate is True:
     expl_var = []
