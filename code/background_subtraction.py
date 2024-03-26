@@ -50,8 +50,8 @@ remove timestamp, replace with False (default)",
     type=int,
 )
 parser.add_argument(
-    "-di",
-    "--differenced_directory",
+    "-ad",
+    "--augment_directory",
     help="Directory where differenced images will be saved",
     required=True,
 )
@@ -121,8 +121,8 @@ image_size = args.resize
 # pixel location of time_stamp in video if wanted to be removed
 time_stamp_loc = args.time_stamp
 
-# directory where differenced images will be saved
-diff_folder = args.differenced_directory
+# directory where augmented images will be saved
+diff_folder = args.augment_directory
 
 # differenced image folder name
 diff_name = args.name

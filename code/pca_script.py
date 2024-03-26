@@ -43,8 +43,8 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-di",
-    "--differenced_directory",
+    "-ad",
+    "--augment_directory",
     help="Directory where differenced images will be saved",
     required=True,
 )
@@ -72,8 +72,8 @@ training_dat_loc = args.training_loc
 # whether to read in center frame from surrounding video/images
 center_image_surround = args.center_image_surround
 
-# directory where differenced images will be saved
-diff_folder = args.differenced_directory
+# directory where pca parameters will be saved
+diff_folder = args.augment_directory
 
 # iterate
 iterate = args.iterate

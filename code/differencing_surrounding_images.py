@@ -58,8 +58,8 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-di",
-    "--differenced_directory",
+    "-ad",
+    "--augment_directory",
     help="Directory where differenced images will be saved",
     required=True,
 )
@@ -128,8 +128,8 @@ time_stamp_loc = args.time_stamp
 # whether to read in center frame from surrounding video/images
 center_image_surround = args.center_image_surround
 
-# directory where differenced images will be saved
-diff_folder = args.differenced_directory
+# directory where augmented images will be saved
+diff_folder = args.augment_directory
 
 # differenced image folder name
 diff_name = args.name
