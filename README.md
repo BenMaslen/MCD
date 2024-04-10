@@ -20,7 +20,7 @@ In order to find out more about the individual movement augmentation script file
 ```
 python <movement_script>.py -h
 ```
-The augmentation_script_execution_e_g.txt script provides example code for using the movement augmentation scripts and the YOLOv8l_implimentation_e_g.txt script provides example code for running the annotated images with YOLOv8l, as well as running the tracking algorithm ByteTrack. For further details please see .
+The augmentation_script_execution_e_g.txt script provides example code for using the movement augmentation scripts and the YOLOv8l_implimentation_e_g.txt script provides example code for running the annotated images with YOLOv8l, as well as running the tracking algorithm ByteTrack. For further details please see https://github.com/ultralytics/ultralytics.
 
 ### Example data
 
