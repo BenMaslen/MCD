@@ -1,4 +1,4 @@
-#Find below example code used to fit a YOLOv8l model
+#Find below example code used to fit a YOLOv8l model as well as the ByteTrack tracking algorithm.
 
 #This code was executed using the CSIRO Bracewell HPC, using 4 GPUs, 8 CPUs
 #and 256gp of memory.
@@ -6,9 +6,15 @@
 #Using Raw data:
 yolo detect train data=../../data/Tassie_BRUV/training_data/data.yaml \
 model=models/yolov8l.pt epochs=300 imgsz=1080 device=0,1,2,3 workers=8 \
-name=../../../../results/Tassie_BRUV/abs_alpha_15_diff_1_true
+name=../../../../results/Tassie_BRUV/raw_tassie_BRUV
 
 #Using movement augmented data:
 yolo detect train data=../../data/Tassie_BRUV/augmented_images/abs_u_15_d_1/data.yaml \
 model=models/yolov8l.pt epochs=300 imgsz=1080 device=0,1,2,3 workers=8 \
-name=../../../../results/Tassie_BRUV/abs_alpha_15_diff_1_true
+name=../../../../results/Tassie_BRUV/abs_u_15_d_1
+
+#Post processing the above model output with the ByteTrack tracking algorithm:
+yolo track model = ../../results/Tassie_BRUV/abs_u_15_d_1/weights/best.pt \
+source= ../../data/Tassie_BRUV/surrounding_videos/20220112_BRUV_SB_B2_Chain_8299.mp4 \
+name=../../../../results/Tassie_BRUV/abs_u_15_d_1_track_20220112_BRUV_SB_B2_Chain_8299 imgsz = 1080 save_txt = True \
+save_conf = True stream_buffer = True tracker="bytetrack.yaml" half=True conf=0.001 iou=0.6
