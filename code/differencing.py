@@ -1,8 +1,9 @@
 # importlibraries
 
-# libraries to extract surrounding images
+# libraries to extract frames
 import os
 import pandas as pd
+import cv2
 import numpy as np
 import shutil
 
@@ -12,13 +13,12 @@ from torchvision import transforms
 from PIL import Image
 from torchvision.utils import save_image
 import pickle as pk
-import random as random
 
 # argument library
 import argparse
 
 parser = argparse.ArgumentParser(
-    description="This script performs three frame differencing images with surrounding images using absolute value, variance, \
+    description="This script performs three frame differencing images with surrounding videos using absolute value, variance, \
     range or direction based measures of spread ('abs','var','range', 'dir'). It can also calculate a 2 frame difference ('2_diff') and background \
     subtraction using frame differencing ('diff_BS')"
 )
@@ -65,16 +65,23 @@ parser.add_argument(
 )
 parser.add_argument("-n", "--name", help="Differenced image folder name", required=True)
 parser.add_argument(
-    "-bn",
-    "--BS_num",
-    help="Number of frames to base background subtraction average on.",
-    default=10,
+    "-d",
+    "--diff",
+    help="Distance in frames (Delta t) between differenced frames and center frame (defaults to 1).",
+    default=1,
     type=int,
 )
 parser.add_argument(
-    "-d",
-    "--diff",
-    help="Distance in frames between differenced frames and center frame (defaults to 1).",
+    "-bn",
+    "--BS_num",
+    help="Number of frames to base background subtraction average on.",
+    default=1,
+    type=int,
+)
+parser.add_argument(
+    "-bs",
+    "--BS_skip",
+    help="Distance in frames (Delta t) between background frames to base background subtraction average on.",
     default=1,
     type=int,
 )
@@ -141,6 +148,7 @@ method = args.method
 red_layer = args.red
 do_pca = args.pca
 BS_num = args.BS_num
+BS_skip = args.BS_skip
 
 # images
 image_loc = training_dat_loc + "images/"
@@ -165,60 +173,30 @@ shutil.copy(yaml_loc, diff_loc + "/data.yaml")
 # import image location data
 val_frame_dat = pd.read_csv(image_to_vid_file)
 
-
 im_num_list = list(range(0, val_frame_dat.shape[0]))
 
 for im_num in im_num_list:
-    # get image folder
-    img_folder = sorted(os.listdir(val_frame_dat["image_folder"][im_num]))
+    video = val_frame_dat["vid_location"][im_num]
+    vidcap = cv2.VideoCapture(video)
 
-    # get index in image folder
-    im_index = img_folder.index(val_frame_dat["image_name"][im_num])
+    # extract frames
+    frame = val_frame_dat["frame"][im_num] + diff
+    vidcap.set(1, frame)
+    success, image = vidcap.read()
+    frame2 = val_frame_dat["frame"][im_num] - diff
+    vidcap.set(1, frame2)
+    success, image2 = vidcap.read()
 
-    # extract left and right image
-    try:
-        left_image_name = img_folder[im_index - diff]
-        left_image = Image.open(val_frame_dat["image_folder"][im_num] + left_image_name)
-    except:  # noqa: E722
-        left_image_name = img_folder[im_index + diff]
-        left_image = Image.open(val_frame_dat["image_folder"][im_num] + left_image_name)
-
-    try:
-        right_image_name = img_folder[im_index + diff]
-        right_image = Image.open(
-            val_frame_dat["image_folder"][im_num] + right_image_name
-        )
-    except:  # noqa: E722
-        right_image_name = img_folder[im_index - diff]
-        right_image = Image.open(
-            val_frame_dat["image_folder"][im_num] + right_image_name
-        )
-
-    # give conditions if left or right image does not exist
-    if left_image_name[:-7] != val_frame_dat["image_name"][im_num][:-7]:
-        left_image = right_image
-    if right_image_name[:-7] != val_frame_dat["image_name"][im_num][:-7]:
-        right_image = left_image
-
-    if method == "naive_BS_short" or method == "diff_BS_short" or method == "diff_BS":
+    if method == "diff_BS":
         BS_count = 0
-
-        background_image_names = os.listdir(
-            val_frame_dat["image_folder"][im_num][:-6] + "empty/"
-        )
-        background_image_names_rand_sample = random.sample(
-            background_image_names, BS_num
-        )
-
-        for rand_img_name in background_image_names_rand_sample:
-            frame_BS_tens = convert_tensor(
-                Image.open(
-                    val_frame_dat["image_folder"][im_num][:-6]
-                    + "empty/"
-                    + rand_img_name
-                )
-            )
-
+        for frame_number_BS in range(
+            max(0, val_frame_dat["frame"][im_num] - (BS_num) * BS_skip),
+            val_frame_dat["frame"][im_num],
+            BS_skip,
+        ):
+            vidcap.set(1, frame_number_BS)
+            ret, frame_BS = vidcap.read()
+            frame_BS_tens = convert_tensor(frame_BS)
             if BS_count == 0:
                 frame_BS_tens_total = frame_BS_tens
             else:
@@ -226,8 +204,17 @@ for im_num in im_num_list:
             BS_count += 1
 
         # fix the image before differencing
-        frame_BS_tens_avg_fixed = frame_BS_tens_total / BS_count
+        frame_BS_tens_avg = frame_BS_tens_total / BS_count
 
+        # fix the image before differencing
+        frame_BS_tens_avg_fixed = torch.stack(
+            (
+                frame_BS_tens_avg[2, :, :],
+                frame_BS_tens_avg[1, :, :],
+                frame_BS_tens_avg[0, :, :],
+            ),
+            dim=0,
+        )
         if image_size is not False:
             frame_BS_tens_avg_fixed = convert_tensor(
                 convert_image(frame_BS_tens_avg_fixed).resize(image_size)
@@ -235,7 +222,9 @@ for im_num in im_num_list:
 
     # read in center image
     if center_image_surround is True:
-        img_center = Image.open(val_frame_dat["image_location"][im_num])
+        frame3 = val_frame_dat["frame"][im_num]
+        vidcap.set(1, frame3)
+        success, img_center = vidcap.read()
     else:
         img_center = Image.open(
             image_loc
@@ -245,31 +234,46 @@ for im_num in im_num_list:
         )
 
     # convert images to tensors
-    img_right_tens_fixed = convert_tensor(right_image)
-    img_left_tens_fixed = convert_tensor(left_image)
+    img_right_tens = convert_tensor(image)
+    img_left_tens = convert_tensor(image2)
     img_center_tens = convert_tensor(img_center)
 
     # fix the left & right image before differencing
-    if image_size is not False:
-        img_center_tens = convert_tensor(
-            convert_image(img_center_tens).resize(image_size)
+    if center_image_surround is True:
+        img_center_tens = torch.stack(
+            (
+                img_center_tens[2, :, :],
+                img_center_tens[1, :, :],
+                img_center_tens[0, :, :],
+            ),
+            dim=0,
         )
+        if image_size is not False:
+            img_center_tens = convert_tensor(
+                convert_image(img_center_tens).resize(image_size)
+            )
+
+    img_right_tens_fixed = torch.stack(
+        (img_right_tens[2, :, :], img_right_tens[1, :, :], img_right_tens[0, :, :]),
+        dim=0,
+    )
+    if image_size is not False:
         img_right_tens_fixed = convert_tensor(
             convert_image(img_right_tens_fixed).resize(image_size)
         )
+    img_left_tens_fixed = torch.stack(
+        (img_left_tens[2, :, :], img_left_tens[1, :, :], img_left_tens[0, :, :]), dim=0
+    )
+    if image_size is not False:
         img_left_tens_fixed = convert_tensor(
             convert_image(img_left_tens_fixed).resize(image_size)
         )
 
     # apply three frame differencing
     if method == "abs":
-        diff_im = (
-            upsilon
-            * 0.5
-            * (
-                abs(img_center_tens - img_right_tens_fixed)
-                + abs(img_center_tens - img_left_tens_fixed)
-            )
+        diff_im = upsilon * (
+            abs(img_center_tens - img_right_tens_fixed)
+            + abs(img_center_tens - img_left_tens_fixed)
         )
 
     elif method == "var":
@@ -326,6 +330,7 @@ for im_num in im_num_list:
 
     elif method == "diff_BS":
         diff_im = upsilon * 0.5 * (img_center_tens - frame_BS_tens_avg_fixed) + 0.5
+
     else:
         print(
             "Please choose one of 'abs', 'var', 'range', 'dir', '2_diff', or 'diff_BS' for method."
