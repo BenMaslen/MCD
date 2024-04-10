@@ -75,7 +75,7 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-c",
+    "-cl",
     "--close",
     help="Whether to use 'close' morphological tranformation with associated kernel. Default is False.",
     action="store_true",

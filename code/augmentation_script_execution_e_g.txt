@@ -26,26 +26,27 @@
 #directory titled 'abs_u_15_d_1' (-n).
 
 
-python -m differencing -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
- -t '../../data/Tassy_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
- -ad '../../data/Tassy_BRUV/augmented_images/' -n 'abs_u_15_d_1' \
+python -m differencing -l '../../data/Tassie_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassie_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
+ -ad '../../data/Tassie_BRUV/augmented_images/' -n 'abs_u_15_d_1' \
  -d 1 -m 'abs' -u 15
 
 #Now let's change approaches and try a direction based approach to three frame differencing (-m), and only
 #replace the red layer with movement information (-r).
 
-python -m differencing -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
- -t '../../data/Tassy_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
- -ad '../../data/Tassy_BRUV/augmented_images/' -n 'dir_u_15_d_1_r' \
+python -m differencing -l '../../data/Tassie_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassie_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
+ -ad '../../data/Tassie_BRUV/augmented_images/' -n 'dir_u_15_d_1_r' \
  -d 1 -m 'dir' -u 15 -r
 
 #Let's also try doing background subtraction using KNN from openCV, with a threshold distance of 400 (-td)
-#and lead in of 500 (-li). For further details see:
+#and lead in of 500 (-li). Note we don't need to use -c here, as background subtraction reads in information from the video
+#by default. For further details see:
 #https://docs.opencv.org/3.4/db/d88/classcv_1_1BackgroundSubtractorKNN.html
 
-python -m background_subtraction -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
- -t '../../data/Tassy_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
- -ad '../../data/Tassy_BRUV/augmented_images/' -n 'back_sub_td_400_li_500_r' -r -td 400 -li 500
+python -m background_subtraction -l '../../data/Tassie_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassie_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 \
+ -ad '../../data/Tassie_BRUV/augmented_images/' -n 'back_sub_td_400_li_500_r' -r -td 400 -li 500
 
 #Next, let's try reducing the 3 colour layers to two using principal component analysis to attempt to 
 #diminish the loss of information that comes with replacing a layer in our annotated frames with
@@ -53,11 +54,13 @@ python -m background_subtraction -l '../../data/Tassy_BRUV/location_data/locatio
 #can reduce the three colour layers to two with the below script.
 
 #Here we are extracting 600 frames (-n) from the training set to undergo PCA. Due to you machines memory capabilities,
-#you may have to reduce this number. The results are saved as a pca.pkl file in the 'augment directory' (-ad).
+#you may have to reduce this number. The results are saved as a pca.pkl file in the 'augment directory' (-ad). The 
+#script will also save an 'explained_var.csv' file to the the 'augment directory', which details the explained 
+#variance from each principal component.
 
-python -m pca_script -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
- -t '../../data/Tassy_BRUV/training_data/' -c \
- -ad '../../data/Tassy_BRUV/augmented_images/' -n 600
+python -m pca_script -l '../../data/Tassie_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassie_BRUV/training_data/' -c \
+ -ad '../../data/Tassie_BRUV/augmented_images/' -n 600
 
 #Now, let's use these principal components with optical flow estimated using the Farneback algorithm in openCV
 #(see https://docs.opencv.org/3.4/de/d9e/classcv_1_1FarnebackOpticalFlow.html for further details), to replace the 
@@ -65,19 +68,19 @@ python -m pca_script -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
 #green and blue layers of the image (-p). The below code looks for the principal components in the augment
 #directory (-ad).
 
-python -m optical_flow -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
- -t '../../data/Tassy_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
- -ad '../../data/Tassy_BRUV/augmented_images/' -n 'flow_1_r_pca' \
+python -m optical_flow -l '../../data/Tassie_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassie_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
+ -ad '../../data/Tassie_BRUV/augmented_images/' -n 'flow_1_r_pca' \
  -d 1 -r -p
 
 #Finally let's again use PCA (-r & -p), and estimate background subtraction with a frame differencing based approach.
 #To do this, we use the differencing script with method 'diff_BS' (-m). We will again multiply the resulting differences 
 #by 15 (-u), and we will take 20 background frames (-bn), each 120 frames away from eachother (-bs).
 
-python -m differencing -l '../../data/Tassy_BRUV/location_data/location_dat.csv'\
- -t '../../data/Tassy_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
- -ad '../../data/Tassy_BRUV/augmented_images/' -n 'diff_BS_bn_20_bs_120_u_15_d_1_r_pca' \
- -d 1 -bn 20 -bs 120 -m 'diff_BS' -a 15 -r -p
+python -m differencing -l '../../data/Tassie_BRUV/location_data/location_dat.csv'\
+ -t '../../data/Tassie_BRUV/training_data/' -rs 1920 1080 -s 0 70 0 635 -c \
+ -ad '../../data/Tassie_BRUV/augmented_images/' -n 'diff_BS_bn_20_bs_120_u_15_d_1_r_pca' \
+ -d 1 -bn 20 -bs 120 -m 'diff_BS' -u 15 -r -p
 
 #Below are some examples using the Deepfish dataset, which asssumes that the 'image_folder' specified in the location_dat (-l)
 #file has surrounding images for the associated annotated image, and the images when ordered alphabetically by their name
