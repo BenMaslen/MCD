@@ -4,7 +4,7 @@ This repository contains code to augment image data using movement quantificatio
 
 
 ### Set up
-In order to run the scripts in this repository, first clone the repository when then using a python virtual environment (or conda environment), install the packages in the requirements.txt file. 
+In order to run the scripts in this repository, first clone the repository, then using a python virtual environment (or conda environment), install the packages in the requirements.txt file. 
 This can be done using the below code:
 ```
 $ virtualenv <env_name>
